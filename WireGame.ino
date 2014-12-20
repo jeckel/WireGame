@@ -12,7 +12,6 @@
  * Define all output
  */
 #define LED_ON      7
-#define LED_RUNNING 8
 #define LED_CONTACT 10
 
 #define BUZZER      9
@@ -28,58 +27,67 @@ unsigned long game_time;
 // initialize the library with the numbers of the interface pins
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
+/**
+ * Setup environment
+ */
 void setup()
 {
-  pinMode(PIN_START, INPUT);
-  pinMode(PIN_END, INPUT);
-  pinMode(PIN_CONTACT, INPUT);
-  pinMode(LED_ON, OUTPUT);
-  pinMode(LED_RUNNING, OUTPUT);
-  pinMode(LED_CONTACT, OUTPUT);
+    // Init pins mode
+    pinMode(PIN_START, INPUT);
+    pinMode(PIN_END, INPUT);
+    pinMode(PIN_CONTACT, INPUT);
+    pinMode(LED_ON, OUTPUT);
+    pinMode(LED_CONTACT, OUTPUT);
   
-  digitalWrite(LED_ON, LOW);
-  digitalWrite(LED_RUNNING, HIGH);
-  digitalWrite(LED_CONTACT, HIGH);
+    // LEDs initial state
+    digitalWrite(LED_ON, LOW);
+    digitalWrite(LED_CONTACT, HIGH);
   
-  // activate pull-up
-  digitalWrite(PIN_START, HIGH);
-  digitalWrite(PIN_END, HIGH);
-  digitalWrite(PIN_CONTACT, HIGH);
+    // activate pull-up
+    digitalWrite(PIN_START, HIGH);
+    digitalWrite(PIN_END, HIGH);
+    digitalWrite(PIN_CONTACT, HIGH);
 
-  // set up the LCD's number of columns and rows: 
-  lcd.begin(16, 2);
+    // set up the LCD's number of columns and rows: 
+    lcd.begin(16, 2);
+    
+    // Display welcome message
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Bonjour Esteban :-)");
 }
 
+/**
+ * Main loop
+ */
 void loop()
 {
-  
-  // start game
-  if (! is_running && digitalRead(PIN_START) == LOW) {
-    initGame();
-  }
-  if (is_running) {
-    // End game ?
-    if (digitalRead(PIN_END) == LOW) {
-      endGame();
+    // start game
+    if (! is_running && digitalRead(PIN_START) == LOW) {
+        initGame();
     }
-    // Contact ?
-    if (digitalRead(PIN_CONTACT) == LOW) {
-      if (! has_contact) {
-        nb_contact++;
-      }
-      tone(BUZZER, 262, 100);
-      has_contact = true;
-      contact_time = millis();
-      digitalWrite(LED_CONTACT, LOW);
-
+    if (is_running) {
+        // End game ?
+        if (digitalRead(PIN_END) == LOW) {
+            endGame();
+        }
+        // Contact ?
+        if (digitalRead(PIN_CONTACT) == LOW) {
+            if (! has_contact) {
+                nb_contact++;
+            }
+            tone(BUZZER, 262, 100);
+            has_contact = true;
+            contact_time = millis();
+            digitalWrite(LED_CONTACT, LOW);
+        }
+        // End of contact ?
+        if (has_contact && (millis() - contact_time > CONTACT_LED_LENGTH)) {
+            digitalWrite(LED_CONTACT, HIGH);
+            has_contact = false;
+        }
     }
-    // End of contact ?
-    if (has_contact && (millis() - contact_time > CONTACT_LED_LENGTH)) {
-      digitalWrite(LED_CONTACT, HIGH);
-      has_contact = false;
-    }
-  }
-  delay(10);
+    delay(10);
 }
 
 
@@ -94,7 +102,6 @@ void initGame()
     has_contact = false;
     nb_contact = 0;
     game_time = millis();
-    digitalWrite(LED_RUNNING, LOW);
     digitalWrite(LED_CONTACT, HIGH);
     lcd.clear();
     lcd.setCursor(0,0);
@@ -109,11 +116,10 @@ void initGame()
  */
 void endGame()
 {
-  unsigned long game_length;
-  game_length = (millis() - game_time) / 1000;
+    unsigned long game_length;
+    game_length = (millis() - game_time) / 1000;
     is_running = false;
     has_contact = false;
-    digitalWrite(LED_RUNNING, HIGH);
     digitalWrite(LED_CONTACT, HIGH);
     lcd.clear();
     lcd.setCursor(0,0);
