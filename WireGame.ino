@@ -86,6 +86,7 @@ void loop()
             digitalWrite(LED_CONTACT, HIGH);
             has_contact = false;
         }
+        displayScore();
     }
     delay(10);
 }
@@ -103,10 +104,6 @@ void initGame()
     nb_contact = 0;
     game_time = millis();
     digitalWrite(LED_CONTACT, HIGH);
-    lcd.clear();
-    lcd.setCursor(0,0);
-    // Print a message to the LCD.
-    lcd.print("Debut");
 }  // initGame
 
 /**
@@ -116,11 +113,19 @@ void initGame()
  */
 void endGame()
 {
-    unsigned long game_length;
-    game_length = (millis() - game_time) / 1000;
     is_running = false;
     has_contact = false;
     digitalWrite(LED_CONTACT, HIGH);
+    displayScore();
+}  // endGame
+
+/**
+ * Contact activated
+ */
+void displayScore()
+{
+    unsigned long game_length;
+    game_length = (millis() - game_time) / 1000;
     lcd.clear();
     lcd.setCursor(0,0);
     // Print a message to the LCD.
@@ -130,4 +135,4 @@ void endGame()
     lcd.setCursor(0,2);
     lcd.print("Erreurs : ");
     lcd.print(nb_contact);
-}  // endGame
+}
